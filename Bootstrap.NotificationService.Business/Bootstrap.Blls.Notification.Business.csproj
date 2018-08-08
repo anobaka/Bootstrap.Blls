@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <AssemblyName>Bootstrap.Blls.Notification.Business</AssemblyName>
+    <RootNamespace>Bootstrap.Blls.NotificationService.Business</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Bootstrap.Home\Bootstrap.Components\Bootstrap.Infrastructures.Components\Bootstrap.Infrastructures.Components.csproj" />
+    <ProjectReference Include="..\Bootstrap.NotificationService.Models\Bootstrap.Notification.Models.csproj" />
+  </ItemGroup>
+
+</Project>

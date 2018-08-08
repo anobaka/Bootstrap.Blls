@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <AssemblyName>Bootstrap.Blls.Notification.Models</AssemblyName>
+    <RootNamespace>Bootstrap.Blls.Notification.Models</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Bootstrap.Home\Bootstrap.Components\Bootstrap.Infrastructures.Extensions\Bootstrap.Infrastructures.Extensions.csproj" />
+    <ProjectReference Include="..\..\Bootstrap.Home\Bootstrap.Components\Bootstrap.Infrastructures.Models\Bootstrap.Infrastructures.Models.csproj" />
+  </ItemGroup>
+
+</Project>
