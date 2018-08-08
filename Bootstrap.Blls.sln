@@ -8,9 +8,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bootstrap.Notification.Models", "Bootstrap.NotificationService.Models\Bootstrap.Notification.Models.csproj", "{6ED22B00-1BF2-4AD4-974D-3BD4B7E57AC4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bootstrap.NotificationBusiness.Models", "Bootstrap.NotificationBusiness.Models\Bootstrap.NotificationBusiness.Models.csproj", "{6ED22B00-1BF2-4AD4-974D-3BD4B7E57AC4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bootstrap.Blls.Notification.Business", "Bootstrap.NotificationService.Business\Bootstrap.Blls.Notification.Business.csproj", "{6B5D6BD3-60C4-483D-82DC-91E19458941C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bootstrap.NotificationBusiness", "Bootstrap.NotificationBusiness\Bootstrap.NotificationBusiness.csproj", "{6B5D6BD3-60C4-483D-82DC-91E19458941C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "notification", "notification", "{FF253D19-8CB0-4FCE-BF48-B1823AF089FF}"
 EndProject

@@ -11,8 +11,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Bootstrap.Home\Bootstrap.Components\Bootstrap.Infrastructures.Components\Bootstrap.Infrastructures.Components.csproj" />
-    <ProjectReference Include="..\Bootstrap.NotificationService.Models\Bootstrap.Notification.Models.csproj" />
+    <ProjectReference Include="..\..\Bootstrap.Infrastructures\Bootstrap.Infrastructures.Components\Bootstrap.Infrastructures.Components.csproj" />
+    <ProjectReference Include="..\Bootstrap.NotificationBusiness.Models\Bootstrap.NotificationBusiness.Models.csproj" />
   </ItemGroup>
 
 </Project>
