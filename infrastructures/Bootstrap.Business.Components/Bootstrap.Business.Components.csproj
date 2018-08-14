@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Bootstrap.Infrastructures\Bootstrap.Infrastructures.Components\Bootstrap.Infrastructures.Components.csproj" />
-    <ProjectReference Include="..\..\Bootstrap.Business.Models\Bootstrap.Business.Models.csproj" />
+    <ProjectReference Include="..\Bootstrap.Business.Models\Bootstrap.Business.Models.csproj" />
   </ItemGroup>
 
 </Project>
