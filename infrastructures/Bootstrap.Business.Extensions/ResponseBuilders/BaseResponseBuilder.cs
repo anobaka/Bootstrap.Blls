@@ -17,7 +17,7 @@ namespace Bootstrap.Business.Extensions.ResponseBuilders
         public static BaseResponse Conflict = Build(ResponseCode.Conflict);
         public static BaseResponse Unauthenticated = Build(ResponseCode.Unauthenticated);
 
-        private static BaseResponse Build(ResponseCode code, string message = null) =>
+        public static BaseResponse Build(ResponseCode code, string message = null) =>
             new BaseResponse((int) code, message ?? SpecificEnumUtils<ResponseCode>.GetDisplayName(code));
     }
 }
