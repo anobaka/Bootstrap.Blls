@@ -16,6 +16,7 @@ namespace Bootstrap.Business.Extensions.ResponseBuilders
         public static BaseResponse NotFound = Build(ResponseCode.NotFound);
         public static BaseResponse Conflict = Build(ResponseCode.Conflict);
         public static BaseResponse Unauthenticated = Build(ResponseCode.Unauthenticated);
+        public static BaseResponse Timeout = Build(ResponseCode.Timeout);
 
         public static BaseResponse Build(ResponseCode code, string message = null) =>
             new BaseResponse((int) code, message ?? SpecificEnumUtils<ResponseCode>.GetDisplayName(code));
