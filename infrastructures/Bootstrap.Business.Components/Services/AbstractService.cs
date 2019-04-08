@@ -18,7 +18,7 @@ using Microsoft.Extensions.Options;
 
 namespace Bootstrap.Business.Components.Services
 {
-    public abstract class SingletonService<TDbContext> where TDbContext : DbContext
+    public abstract class AbstractService<TDbContext> where TDbContext : DbContext
     {
         protected IServiceProvider ServiceProvider;
         protected IServiceCacheManager CacheManager;
@@ -31,7 +31,7 @@ namespace Bootstrap.Business.Components.Services
         protected virtual TDbContext DbContext => GetRequiredService<TDbContext>();
         protected virtual TDbContext DbContextFromNewScope => GetRequiredServiceFromNewScope<TDbContext>();
 
-        protected SingletonService(IServiceProvider serviceProvider)
+        protected AbstractService(IServiceProvider serviceProvider)
         {
             ServiceProvider = serviceProvider;
             Logger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(GetType());
@@ -431,10 +431,10 @@ namespace Bootstrap.Business.Components.Services
         #endregion
     }
 
-    public abstract class SingletonService<TDbContext, TDefaultResource> : SingletonService<TDbContext>
+    public abstract class AbstractService<TDbContext, TDefaultResource> : AbstractService<TDbContext>
         where TDbContext : DbContext where TDefaultResource : class
     {
-        protected SingletonService(IServiceProvider serviceProvider) : base(serviceProvider)
+        protected AbstractService(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
 

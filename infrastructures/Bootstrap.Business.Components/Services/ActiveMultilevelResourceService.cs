@@ -12,11 +12,11 @@ using Microsoft.EntityFrameworkCore;
 namespace Bootstrap.Business.Components.Services
 {
     public class
-        SingletonActiveMultilevelDataService<TDbContext, TDefaultResource> : SingletonService<TDbContext,
+        ActiveMultilevelResourceService<TDbContext, TDefaultResource> : AbstractService<TDbContext,
             TDefaultResource>
-        where TDbContext : DbContext where TDefaultResource : ActiveMultilevelData<TDefaultResource>
+        where TDbContext : DbContext where TDefaultResource : ActiveMultilevelResource<TDefaultResource>
     {
-        public SingletonActiveMultilevelDataService(IServiceProvider serviceProvider) : base(serviceProvider)
+        public ActiveMultilevelResourceService(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
 

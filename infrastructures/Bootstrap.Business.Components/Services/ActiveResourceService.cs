@@ -10,11 +10,11 @@ using Microsoft.EntityFrameworkCore;
 namespace Bootstrap.Business.Components.Services
 {
     public abstract class
-        SingletonActiveResourceService<TDbContext, TDefaultResource> : SingletonService<TDbContext, TDefaultResource>
+        ActiveResourceService<TDbContext, TDefaultResource> : AbstractService<TDbContext, TDefaultResource>
         where TDbContext : DbContext where TDefaultResource : ActiveResource
 
     {
-        protected SingletonActiveResourceService(IServiceProvider serviceProvider) : base(serviceProvider)
+        protected ActiveResourceService(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
 
