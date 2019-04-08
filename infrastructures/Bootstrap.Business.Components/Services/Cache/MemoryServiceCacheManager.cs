@@ -101,13 +101,20 @@ namespace Bootstrap.Business.Components.Services.Cache
 
         public Task<T> GetCustomCache<T>(string cacheKey) where T : class
         {
-            return _customCacheVault.TryGetValue(cacheKey, out var o) ? Task.FromResult((T) o) : null;
+            return _customCacheVault.TryGetValue(_buildCacheKey<T>(cacheKey), out var o)
+                ? Task.FromResult((T) o)
+                : null;
         }
 
         public Task SetCustomCache<T>(string cacheKey, T obj) where T : class
         {
-            _customCacheVault[cacheKey] = obj;
+            _customCacheVault[_buildCacheKey<T>(cacheKey)] = obj;
             return Task.CompletedTask;
+        }
+
+        private string _buildCacheKey<T>(string key)
+        {
+            return $"{SpecificTypeUtils<T>.Type.FullName}-{key}";
         }
     }
 }
