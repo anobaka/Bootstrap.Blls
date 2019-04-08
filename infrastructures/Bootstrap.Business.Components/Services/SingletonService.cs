@@ -38,7 +38,7 @@ namespace Bootstrap.Business.Components.Services
             Options = serviceProvider.GetRequiredService<IOptions<ServiceOptions>>();
             if (Options.Value.EnableCache)
             {
-                CacheManager = serviceProvider.GetRequiredService<IServiceCacheManager>();
+                CacheManager = serviceProvider.GetService<IServiceCacheManager>() ?? new MemoryServiceCacheManager();
             }
         }
 
