@@ -12,6 +12,8 @@ namespace Bootstrap.Business.Components.Services.Cache
         Task Set<T>(object id, T data) where T : class;
         Task Set<T>(IDictionary<object, T> data) where T : class;
         Task Delete<T>(object id) where T : class;
-        Task Delete<T>(List<object> ids) where T : class;
+        Task Delete<T>(IEnumerable<object> ids) where T : class;
+        Task<T> GetCustomCache<T>(string cacheKey) where T : class;
+        Task SetCustomCache<T>(string cacheKey, T obj) where T : class;
     }
 }

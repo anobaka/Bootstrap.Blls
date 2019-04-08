@@ -26,6 +26,7 @@ namespace Bootstrap.Business.Components.Services
             return BaseResponseBuilder.Ok;
         }
 
+        /// <inheritdoc />
         /// <summary>
         /// 删除，动态缓存
         /// </summary>
@@ -39,6 +40,7 @@ namespace Bootstrap.Business.Components.Services
             return BaseResponseBuilder.Ok;
         }
 
+        /// <inheritdoc />
         /// <summary>
         /// 删除，动态缓存
         /// </summary>

@@ -12,20 +12,15 @@ using Bootstrap.Infrastructures.Extensions;
 using Bootstrap.Infrastructures.Models.ResponseModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
-using StackExchange.Redis;
 
 namespace Bootstrap.Business.Components.Services
 {
     public abstract class SingletonService<TDbContext> where TDbContext : DbContext
     {
-        protected IDistributedCache DistributedCache => GetRequiredService<IDistributedCache>();
         protected IServiceProvider ServiceProvider;
-        protected CacheRedisClient Redis => GetRequiredService<CacheRedisClient>();
         protected IServiceCacheManager CacheManager;
         protected IOptions<ServiceOptions> Options;
         protected ILogger Logger;
@@ -33,32 +28,8 @@ namespace Bootstrap.Business.Components.Services
         private static readonly ConcurrentDictionary<string, object> CachedServices =
             new ConcurrentDictionary<string, object>();
 
-        /// <summary>
-        /// {Type Fullname}-All
-        /// </summary>
-        private const string AllDataCacheKeyTemplate = "{0}-All";
-
-        private class CacheData<T>
-        {
-            public CacheData()
-            {
-            }
-
-            public CacheData(object key, T data)
-            {
-                Key = key.ToString();
-                Data = data;
-            }
-
-            public CacheData(T data, Func<T, object> keySelector)
-            {
-                Data = data;
-                Key = keySelector(data).ToString();
-            }
-
-            public string Key { get; }
-            public T Data { get; }
-        }
+        protected virtual TDbContext DbContext => GetRequiredService<TDbContext>();
+        protected virtual TDbContext DbContextFromNewScope => GetRequiredServiceFromNewScope<TDbContext>();
 
         protected SingletonService(IServiceProvider serviceProvider)
         {
@@ -71,9 +42,7 @@ namespace Bootstrap.Business.Components.Services
             }
         }
 
-        protected virtual TDbContext DbContext => GetRequiredService<TDbContext>();
-
-        protected virtual TDbContext DbContextFromNewScope => GetRequiredServiceFromNewScope<TDbContext>();
+        #region Services
 
         /// <summary>
         /// 
@@ -106,6 +75,58 @@ namespace Bootstrap.Business.Components.Services
         protected virtual T GetRequiredServiceFromNewScope<T>() =>
             ServiceProvider.CreateScope().ServiceProvider.GetRequiredService<T>();
 
+        #endregion
+
+        #region Helpers
+
+        /// <summary>
+        /// Temporary method.
+        /// todo: optimize
+        /// </summary>
+        /// <typeparam name="TResource"></typeparam>
+        /// <typeparam name="TOut"></typeparam>
+        /// <param name="v"></param>
+        /// <param name="buildBody">key type, key, instance value(s), body</param>
+        /// <returns></returns>
+        private Expression<Func<TResource, TOut>> _buildKeyExpression<TResource, TOut>(object v,
+            Func<Type, Expression, Expression, Expression> buildBody)
+        {
+            var type = SpecificTypeUtils<TResource>.Type;
+            var keyProperty = type.GetKeyProperty();
+            if (keyProperty == null)
+            {
+                throw new InvalidOperationException($"Can not find a key property of type: {type.FullName}");
+            }
+
+            var arg = Expression.Parameter(type);
+            var key = Expression.Property(arg, keyProperty);
+            var value = v == null ? null : Expression.Constant(v);
+            var body = buildBody(keyProperty.PropertyType, key, value);
+            var lambda = Expression.Lambda<Func<TResource, TOut>>(body, arg);
+            return lambda;
+        }
+
+        private Func<TResource, object> _getKeySelector<TResource>()
+        {
+            return _buildKeyExpression<TResource, object>(null,
+                (t, key, value) => Expression.TypeAs(key, SpecificTypeUtils<object>.Type)).Compile();
+        }
+
+        private Expression<Func<TResource, bool>> _buildKeyEqualsExpression<TResource>(object key)
+        {
+            return _buildKeyExpression<TResource, bool>(key, (type, i, v) => Expression.Equal(i, v));
+        }
+
+        private Expression<Func<TResource, bool>> _buildKeyContainsExpression<TResource>(IEnumerable<object> keys)
+        {
+            return _buildKeyExpression<TResource, bool>(keys,
+                (t, i, v) => Expression.Call(typeof(Enumerable), nameof(Enumerable.Contains), new[] {t}, i, v));
+        }
+
+        #endregion
+
+        #region IdRelatedOperations
+
         /// <summary>
         /// 动态缓存
         /// </summary>
@@ -121,41 +142,22 @@ namespace Bootstrap.Business.Components.Services
             {
                 resource = await CacheManager.Get<TResource>(key);
                 dataNotExist = resource == null;
-//                await Redis.ExecuteAsync(async t =>
-//                {
-//                    var json = await t.HashGetAsync(SpecificTypeUtils<TResource>.Type.FullName, key.ToString());
-//                    if (!string.IsNullOrEmpty(json))
-//                    {
-//                        var cache = JsonConvert.DeserializeObject<CacheData<TResource>>(json);
-//                        if (cache.Data == null)
-//                        {
-//                            dataNotExist = true;
-//                        }
-//                        else
-//                        {
-//                            resource = cache.Data;
-//                        }
-//                    }
-//                });
             }
 
             if (!dataNotExist && resource == null)
             {
-                resource = await GetFirst<TResource>(t =>
-                    DynamicCacheOptions<TResource>.KeySelector(t).Equals(key));
+                var exp = _buildKeyEqualsExpression<TResource>(key);
+                resource = await GetFirst(exp);
                 if (Options.Value.EnableCache)
                 {
                     await CacheManager.Set(key, resource);
-//                    await Redis.ExecuteAsync(async t =>
-//                    {
-//                        await t.HashSetAsync(SpecificTypeUtils<TResource>.Type.FullName, key.ToString(),
-//                            JsonConvert.SerializeObject(new CacheData<TResource>(key, resource)));
-//                    });
                 }
             }
 
             return resource;
         }
+
+        #region IdUnrelatedOperations
 
         /// <summary>
         /// 动态缓存
@@ -171,16 +173,7 @@ namespace Bootstrap.Business.Components.Services
             var tobeQueriedDataKeys = ks.ToList();
             if (Options.Value.EnableCache)
             {
-//                Dictionary<string, TResource> cache = null;
                 var cache = await CacheManager.Get<TResource>(ks);
-//                await Redis.ExecuteAsync(async t =>
-//                {
-//                    var jsons = await t.HashGetAsync(SpecificTypeUtils<TResource>.Type.FullName,
-//                        ks.Select(a => (RedisValue) a.ToString()).ToArray());
-//                    cache = jsons?.Where(a => !string.IsNullOrEmpty(a)).Select(a =>
-//                            JsonConvert.DeserializeObject<CacheData<TResource>>(a))
-//                        .ToDictionary(a => a.Key, a => a.Data);
-//                });
                 if (cache != null)
                 {
                     tobeQueriedDataKeys.RemoveAll(t => cache.ContainsKey(t.ToString()));
@@ -190,10 +183,8 @@ namespace Bootstrap.Business.Components.Services
 
             if (tobeQueriedDataKeys.Any())
             {
-                var tResources =
-                    (await GetAll<TResource>(t =>
-                        tobeQueriedDataKeys.Contains(DynamicCacheOptions<TResource>.KeySelector(t))))
-                    .ToDictionary(t => DynamicCacheOptions<TResource>.KeySelector(t), t => t);
+                var exp = _buildKeyContainsExpression<TResource>(tobeQueriedDataKeys);
+                var tResources = (await GetAll(exp)).ToDictionary(_getKeySelector<TResource>(), t => t);
                 if (tResources.Any())
                 {
                     if (resources == null)
@@ -207,16 +198,6 @@ namespace Bootstrap.Business.Components.Services
                 if (Options.Value.EnableCache)
                 {
                     await CacheManager.Set(tResources);
-//                    await Redis.ExecuteAsync(async t =>
-//                    {
-//                        await t.HashSetAsync(SpecificTypeUtils<TResource>.Type.FullName,
-//                            tobeQueriedDataKeys.Select(a =>
-//                            {
-//                                tResources.TryGetValue(a, out var resource);
-//                                return new HashEntry(a.ToString(),
-//                                    JsonConvert.SerializeObject(new CacheData<TResource>(a, resource)));
-//                            }).ToArray());
-//                    });
                 }
             }
 
@@ -231,13 +212,12 @@ namespace Bootstrap.Business.Components.Services
         /// <returns></returns>
         public virtual async Task<BaseResponse> DeleteByKey<TResource>(object key) where TResource : class
         {
-            var rsp = await Delete<TResource>(t => DynamicCacheOptions<TResource>.KeySelector(t).Equals(key));
+            var exp = _buildKeyEqualsExpression<TResource>(key);
+            var rsp = await Delete(exp);
 
             if (Options.Value.EnableCache)
             {
                 await CacheManager.Delete<TResource>(key);
-//                await Redis.ExecuteAsync(t =>
-//                    t.HashDeleteAsync(SpecificTypeUtils<TResource>.Type.FullName, key.ToString()));
             }
 
             return rsp;
@@ -252,18 +232,19 @@ namespace Bootstrap.Business.Components.Services
         public virtual async Task<BaseResponse> DeleteByKeys<TResource>(IEnumerable<object> keys)
             where TResource : class
         {
-            var rsp = await Delete<TResource>(t => keys.Contains(DynamicCacheOptions<TResource>.KeySelector(t)));
+            var ks = keys.ToList();
+            var exp = _buildKeyContainsExpression<TResource>(ks);
+            var rsp = await Delete(exp);
 
             if (Options.Value.EnableCache)
             {
-//                await Redis.ExecuteAsync(t =>
-//                    t.HashDeleteAsync(SpecificTypeUtils<TResource>.Type.FullName,
-//                        keys.Select(a => (RedisValue) a.ToString()).ToArray()));
-                await CacheManager.Delete<TResource>(keys.ToList());
+                await CacheManager.Delete<TResource>(ks);
             }
 
             return rsp;
         }
+
+        #endregion
 
         /// <summary>
         /// 获取第一条，静态缓存
@@ -281,7 +262,7 @@ namespace Bootstrap.Business.Components.Services
             TResource result = null;
             if (cacheOptions?.IsValid == true)
             {
-                result = await DistributedCache.GetObjectAsync<TResource>(cacheOptions.CacheKey);
+                result = await CacheManager.GetCustomCache<TResource>(cacheOptions.CacheKey);
             }
 
             if (result == null)
@@ -300,7 +281,7 @@ namespace Bootstrap.Business.Components.Services
                 result = await query.FirstOrDefaultAsync();
                 if (cacheOptions?.IsValid == true && result != null)
                 {
-                    await DistributedCache.SetObjectAsync(cacheOptions.CacheKey, result);
+                    await CacheManager.SetCustomCache(cacheOptions.CacheKey, result);
                 }
             }
 
@@ -321,15 +302,14 @@ namespace Bootstrap.Business.Components.Services
             List<TResource> result = null;
             if (selector == null && cacheOptions != null)
             {
-                cacheOptions.CacheKey = string.Format(AllDataCacheKeyTemplate,
-                    SpecificTypeUtils<TResource>.Type.FullName);
+                result = await CacheManager.GetCustomCache<List<TResource>>(cacheOptions.CacheKey);
             }
 
             if (cacheOptions?.IsValid == true)
             {
                 if (!cacheOptions.Refresh)
                 {
-                    result = await DistributedCache.GetObjectAsync<List<TResource>>(cacheOptions.CacheKey);
+                    result = await CacheManager.GetCustomCache<List<TResource>>(cacheOptions.CacheKey);
                 }
             }
 
@@ -344,7 +324,7 @@ namespace Bootstrap.Business.Components.Services
                 result = await query.ToListAsync();
                 if (cacheOptions?.IsValid == true && result != null)
                 {
-                    await DistributedCache.SetObjectAsync(cacheOptions.CacheKey, result);
+                    await CacheManager.SetCustomCache(cacheOptions.CacheKey, result);
                 }
             }
 
@@ -372,7 +352,7 @@ namespace Bootstrap.Business.Components.Services
             SearchResponse<TResource> result = null;
             if (cacheOptions?.IsValid == true)
             {
-                result = await DistributedCache.GetObjectAsync<SearchResponse<TResource>>(cacheOptions.CacheKey);
+                result = await CacheManager.GetCustomCache<SearchResponse<TResource>>(cacheOptions.CacheKey);
             }
 
             if (result == null)
@@ -393,7 +373,7 @@ namespace Bootstrap.Business.Components.Services
                 result = new SearchResponse<TResource>(data, count, pageIndex, pageSize);
                 if (cacheOptions?.IsValid == true)
                 {
-                    await DistributedCache.SetObjectAsync(cacheOptions.CacheKey, result);
+                    await CacheManager.SetCustomCache(cacheOptions.CacheKey, result);
                 }
             }
 
@@ -431,15 +411,6 @@ namespace Bootstrap.Business.Components.Services
         {
             DbContext.Add(resource);
             await DbContext.SaveChangesAsync();
-            if (Options.Value.EnableCache)
-            {
-                await Redis.ExecuteAsync(async t =>
-                {
-                    await t.HashDeleteAsync(SpecificTypeUtils<TResource>.Type.FullName,
-                        DynamicCacheOptions<TResource>.KeySelector(resource).ToString());
-                });
-            }
-
             return new SingletonResponse<TResource>(resource);
         }
 
@@ -454,18 +425,10 @@ namespace Bootstrap.Business.Components.Services
         {
             DbContext.AddRange(resources);
             await DbContext.SaveChangesAsync();
-            if (Options.Value.EnableCache)
-            {
-                await Redis.ExecuteAsync(async t =>
-                {
-                    await t.HashDeleteAsync(SpecificTypeUtils<TResource>.Type.FullName,
-                        resources.Select(a => (RedisValue) DynamicCacheOptions<TResource>.KeySelector(a).ToString())
-                            .ToArray());
-                });
-            }
-
             return new ListResponse<TResource>(resources);
         }
+
+        #endregion
     }
 
     public abstract class SingletonService<TDbContext, TDefaultResource> : SingletonService<TDbContext>

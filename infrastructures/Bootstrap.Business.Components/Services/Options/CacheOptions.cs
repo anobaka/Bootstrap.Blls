@@ -3,7 +3,7 @@
 namespace Bootstrap.Business.Components.Services.Options
 {
     /// <summary>
-    /// TODO: Do not use this for now.
+    /// todo: optimize
     /// </summary>
     public class CacheOptions
     {

@@ -11,15 +11,22 @@ namespace Bootstrap.Business.Components.Services.Cache
     public class MemoryServiceCacheManager : IServiceCacheManager
     {
         /// <summary>
-        /// Type - key - instance
+        /// Type - Key - Data
         /// </summary>
-        private readonly ConcurrentDictionary<string, ConcurrentDictionary<object, object>> _cache =
+        private readonly ConcurrentDictionary<string, ConcurrentDictionary<object, object>> _defaultCacheVault =
             new ConcurrentDictionary<string, ConcurrentDictionary<object, object>>();
+
+        /// <summary>
+        /// CacheKey - Data
+        /// </summary>
+        private readonly ConcurrentDictionary<string, object> _customCacheVault =
+            new ConcurrentDictionary<string, object>();
 
         public Task<T> Get<T>(object id) where T : class
         {
             T instance = null;
-            if (_cache.TryGetValue(SpecificTypeUtils<T>.Type.FullName, out var v) && v.TryGetValue(id, out var i))
+            if (_defaultCacheVault.TryGetValue(SpecificTypeUtils<T>.Type.FullName, out var v) &&
+                v.TryGetValue(id, out var i))
             {
                 instance = (T) i;
             }
@@ -30,7 +37,7 @@ namespace Bootstrap.Business.Components.Services.Cache
         public Task<Dictionary<object, T>> Get<T>(List<object> ids) where T : class
         {
             Dictionary<object, T> result = null;
-            if (_cache.TryGetValue(SpecificTypeUtils<T>.Type.FullName, out var v))
+            if (_defaultCacheVault.TryGetValue(SpecificTypeUtils<T>.Type.FullName, out var v))
             {
                 foreach (var i in ids)
                 {
@@ -51,7 +58,7 @@ namespace Bootstrap.Business.Components.Services.Cache
 
         public Task Set<T>(object id, T data) where T : class
         {
-            var vault = _cache.GetOrAdd(SpecificTypeUtils<T>.Type.FullName,
+            var vault = _defaultCacheVault.GetOrAdd(SpecificTypeUtils<T>.Type.FullName,
                 t => new ConcurrentDictionary<object, object>());
             vault[id] = data;
             return Task.CompletedTask;
@@ -59,7 +66,7 @@ namespace Bootstrap.Business.Components.Services.Cache
 
         public Task Set<T>(IDictionary<object, T> data) where T : class
         {
-            var vault = _cache.GetOrAdd(SpecificTypeUtils<T>.Type.FullName,
+            var vault = _defaultCacheVault.GetOrAdd(SpecificTypeUtils<T>.Type.FullName,
                 t => new ConcurrentDictionary<object, object>());
             foreach (var k in data)
             {
@@ -71,7 +78,7 @@ namespace Bootstrap.Business.Components.Services.Cache
 
         public Task Delete<T>(object id) where T : class
         {
-            if (_cache.TryGetValue(SpecificTypeUtils<T>.Type.FullName, out var vault))
+            if (_defaultCacheVault.TryGetValue(SpecificTypeUtils<T>.Type.FullName, out var vault))
             {
                 vault.TryRemove(id, out _);
             }
@@ -79,13 +86,27 @@ namespace Bootstrap.Business.Components.Services.Cache
             return Task.CompletedTask;
         }
 
-        public Task Delete<T>(List<object> ids) where T : class
+        public Task Delete<T>(IEnumerable<object> ids) where T : class
         {
-            if (_cache.TryGetValue(SpecificTypeUtils<T>.Type.FullName, out var vault))
+            if (_defaultCacheVault.TryGetValue(SpecificTypeUtils<T>.Type.FullName, out var vault))
             {
-                ids.ForEach(t => vault.TryRemove(t, out _));
+                foreach (var i in ids)
+                {
+                    vault.TryRemove(i, out _);
+                }
             }
 
+            return Task.CompletedTask;
+        }
+
+        public Task<T> GetCustomCache<T>(string cacheKey) where T : class
+        {
+            return _customCacheVault.TryGetValue(cacheKey, out var o) ? Task.FromResult((T) o) : null;
+        }
+
+        public Task SetCustomCache<T>(string cacheKey, T obj) where T : class
+        {
+            _customCacheVault[cacheKey] = obj;
             return Task.CompletedTask;
         }
     }

@@ -12,23 +12,17 @@ using Microsoft.EntityFrameworkCore;
 namespace Bootstrap.Business.Components.Services
 {
     public class
-        SingletonActiveMultilevelDataService<TDbContext, TDefaultResource> : SingletonService<TDbContext,
-            TDefaultResource>
-        where TDbContext : DbContext where TDefaultResource : ActiveMultilevelData<TDefaultResource>
+        SingletonMultilevelDataService<TDbContext, TDefaultResource> : SingletonService<TDbContext, TDefaultResource>
+        where TDbContext : DbContext where TDefaultResource : MultilevelData<TDefaultResource>
     {
-        public SingletonActiveMultilevelDataService(IServiceProvider serviceProvider) : base(serviceProvider)
+        public SingletonMultilevelDataService(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
 
         public async Task<List<TDefaultResource>> GetPath(int id)
         {
             var resource = await GetByKey(id);
-            if (resource == null)
-            {
-                return null;
-            }
-
-            return GetPath(DbContext.Set<TDefaultResource>(), resource);
+            return resource == null ? null : GetPath(DbContext.Set<TDefaultResource>(), resource);
         }
 
         public List<TDefaultResource> GetPath(IEnumerable<TDefaultResource> allResources, TDefaultResource child)
@@ -45,7 +39,7 @@ namespace Bootstrap.Business.Components.Services
 
         public async Task<List<TDefaultResource>> GetFullTree()
         {
-            var data = await GetAll(t => t.Active);
+            var data = await GetAll();
             var root = data.FindAll(t => !t.ParentId.HasValue);
             _populateTree(root, data);
             return root;
@@ -78,7 +72,6 @@ namespace Bootstrap.Business.Components.Services
         public override async Task<BaseResponse> Delete(Expression<Func<TDefaultResource, bool>> selector)
         {
             var resources = await GetAll(selector);
-            resources.ForEach(a => a.Active = false);
             await DbContext.SaveChangesAsync();
             await BuildTree();
             return BaseResponseBuilder.Ok;
@@ -95,7 +88,6 @@ namespace Bootstrap.Business.Components.Services
         public override async Task<BaseResponse> DeleteByKey(object key)
         {
             var resource = await GetByKey(key);
-            resource.Active = false;
             await DbContext.SaveChangesAsync();
             await BuildTree();
             return BaseResponseBuilder.Ok;
@@ -104,7 +96,6 @@ namespace Bootstrap.Business.Components.Services
         public override async Task<BaseResponse> DeleteByKeys(IEnumerable<object> key)
         {
             var resources = await GetByKeys(key);
-            resources.ForEach(a => a.Active = false);
             await DbContext.SaveChangesAsync();
             await BuildTree();
             return BaseResponseBuilder.Ok;
