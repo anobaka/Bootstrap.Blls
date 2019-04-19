@@ -25,7 +25,7 @@ namespace Bootstrap.Business.Components.Services
             return resource == null ? null : GetPath(DbContext.Set<TDefaultResource>(), resource);
         }
 
-        public List<TDefaultResource> GetPath(IEnumerable<TDefaultResource> allResources, TDefaultResource child)
+        protected List<TDefaultResource> GetPath(IEnumerable<TDefaultResource> allResources, TDefaultResource child)
         {
             if (child == null)
             {
@@ -37,9 +37,9 @@ namespace Bootstrap.Business.Components.Services
             return path.OrderBy(t => t.Left).ToList();
         }
 
-        public async Task<List<TDefaultResource>> GetFullTree()
+        public async Task<List<TDefaultResource>> GetAll()
         {
-            var data = await GetAll();
+            var data = await base.GetAll();
             var root = data.FindAll(t => !t.ParentId.HasValue);
             _populateTree(root, data);
             return root;
@@ -62,9 +62,9 @@ namespace Bootstrap.Business.Components.Services
         /// 异步刷新分级关系
         /// </summary>
         /// <returns></returns>
-        public async Task BuildTree()
+        protected async Task BuildTree()
         {
-            var tree = await GetFullTree();
+            var tree = await GetAll();
             tree.BuildTree();
             await DbContext.SaveChangesAsync();
         }
