@@ -71,10 +71,10 @@ namespace Bootstrap.Business.Components.Services
 
         public override async Task<BaseResponse> Delete(Expression<Func<TDefaultResource, bool>> selector)
         {
-            var resources = await GetAll(selector);
+            var rsp = await base.Delete(selector);
             await DbContext.SaveChangesAsync();
             await BuildTree();
-            return BaseResponseBuilder.Ok;
+            return rsp;
         }
 
         public override async Task<SingletonResponse<TDefaultResource>> Create(TDefaultResource resource)
@@ -87,18 +87,18 @@ namespace Bootstrap.Business.Components.Services
 
         public override async Task<BaseResponse> DeleteByKey(object key)
         {
-            var resource = await GetByKey(key);
+            var rsp = await base.DeleteByKey(key);
             await DbContext.SaveChangesAsync();
             await BuildTree();
-            return BaseResponseBuilder.Ok;
+            return rsp;
         }
 
-        public override async Task<BaseResponse> DeleteByKeys(IEnumerable<object> key)
+        public override async Task<BaseResponse> DeleteByKeys(IEnumerable<object> keys)
         {
-            var resources = await GetByKeys(key);
+            var rsp = await base.DeleteByKeys(keys);
             await DbContext.SaveChangesAsync();
             await BuildTree();
-            return BaseResponseBuilder.Ok;
+            return rsp;
         }
 
         public override async Task<SingletonResponse<TResource>> Create<TResource>(TResource resource)
