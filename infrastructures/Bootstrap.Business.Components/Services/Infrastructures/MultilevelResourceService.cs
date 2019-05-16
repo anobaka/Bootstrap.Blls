@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Bootstrap.Business.Extensions.ResponseBuilders;
 using Bootstrap.Infrastructures.Components.Extensions;
 using Bootstrap.Infrastructures.Models;
 using Bootstrap.Infrastructures.Models.ResponseModels;
 using Microsoft.EntityFrameworkCore;
 
-namespace Bootstrap.Business.Components.Services
+namespace Bootstrap.Business.Components.Services.Infrastructures
 {
     public class
         MultilevelResourceService<TDbContext, TDefaultResource> : AbstractService<TDbContext, TDefaultResource>

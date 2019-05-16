@@ -16,7 +16,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Bootstrap.Business.Components.Services
+namespace Bootstrap.Business.Components.Services.Infrastructures
 {
     public abstract class AbstractService<TDbContext> where TDbContext : DbContext
     {

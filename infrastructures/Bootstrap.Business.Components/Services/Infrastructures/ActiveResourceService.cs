@@ -7,7 +7,7 @@ using Bootstrap.Infrastructures.Models;
 using Bootstrap.Infrastructures.Models.ResponseModels;
 using Microsoft.EntityFrameworkCore;
 
-namespace Bootstrap.Business.Components.Services
+namespace Bootstrap.Business.Components.Services.Infrastructures
 {
     public abstract class
         ActiveResourceService<TDbContext, TDefaultResource> : AbstractService<TDbContext, TDefaultResource>
