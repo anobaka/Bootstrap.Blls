@@ -12,9 +12,11 @@ using Bootstrap.Infrastructures.Extensions;
 using Bootstrap.Infrastructures.Models.ResponseModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using StackExchange.Redis;
 
 namespace Bootstrap.Business.Components.Services.Infrastructures
 {
@@ -30,6 +32,12 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
 
         protected virtual TDbContext DbContext => GetRequiredService<TDbContext>();
         protected virtual TDbContext DbContextFromNewScope => GetRequiredServiceFromNewScope<TDbContext>();
+
+        protected virtual IDbContextTransaction GetTransaction(out bool isNewTransaction, bool ignoreExisted = false)
+        {
+            isNewTransaction = ignoreExisted || DbContext.Database.CurrentTransaction == null;
+            return isNewTransaction ? DbContext.Database.BeginTransaction() : DbContext.Database.CurrentTransaction;
+        }
 
         protected AbstractService(IServiceProvider serviceProvider)
         {
