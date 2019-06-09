@@ -24,6 +24,12 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
             return resource == null ? null : GetPath(DbContext.Set<TDefaultResource>(), resource);
         }
 
+        /// <summary>
+        /// From up to down.
+        /// </summary>
+        /// <param name="allResources"></param>
+        /// <param name="child"></param>
+        /// <returns></returns>
         protected List<TDefaultResource> GetPath(IEnumerable<TDefaultResource> allResources, TDefaultResource child)
         {
             if (child == null)
