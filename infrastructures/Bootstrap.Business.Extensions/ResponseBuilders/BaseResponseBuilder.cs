@@ -22,5 +22,6 @@ namespace Bootstrap.Business.Extensions.ResponseBuilders
             new BaseResponse((int) code, message ?? SpecificEnumUtils<ResponseCode>.GetDisplayName(code));
 
         public static BaseResponse BuildBadRequest(string message) => Build(ResponseCode.InvalidPayload, message);
+        public static BaseResponse BuildUnauthorized(string message) => Build(ResponseCode.Unauthorized, message);
     }
 }
