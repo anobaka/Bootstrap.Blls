@@ -302,9 +302,10 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
         /// <typeparam name="TResource"></typeparam>
         /// <param name="selector">为空则获取全部，如果使用缓存，会自动指定缓存key</param>
         /// <param name="cacheOptions"></param>
+        /// <param name="useNewDbContext"></param>
         /// <returns></returns>
         public virtual async Task<List<TResource>> GetAll<TResource>(Expression<Func<TResource, bool>> selector,
-            CacheOptions cacheOptions = null)
+            CacheOptions cacheOptions = null, bool useNewDbContext = false)
             where TResource : class
         {
             List<TResource> result = null;
@@ -323,7 +324,8 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
 
             if (result == null)
             {
-                IQueryable<TResource> query = DbContext.Set<TResource>();
+                var dbContext = useNewDbContext ? DbContextFromNewScope : DbContext;
+                IQueryable<TResource> query = dbContext.Set<TResource>();
                 if (selector != null)
                 {
                     query = query.Where(selector);
@@ -487,10 +489,11 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
         /// </summary>
         /// <param name="selector">为空则获取全部，如果使用了缓存会自动指定缓存key</param>
         /// <param name="cacheOptions"></param>
+        /// <param name="useNewDbContext"></param>
         /// <returns></returns>
         public virtual async Task<List<TDefaultResource>> GetAll(Expression<Func<TDefaultResource, bool>> selector,
-            CacheOptions cacheOptions = null) =>
-            await GetAll<TDefaultResource>(selector, cacheOptions);
+            CacheOptions cacheOptions = null, bool useNewDbContext = false) =>
+            await GetAll<TDefaultResource>(selector, cacheOptions, useNewDbContext);
 
         /// <summary>
         /// 搜索默认资源，静态缓存
