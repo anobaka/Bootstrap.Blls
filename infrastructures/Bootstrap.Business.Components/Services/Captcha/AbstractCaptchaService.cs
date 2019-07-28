@@ -17,7 +17,7 @@ namespace Bootstrap.Business.Components.Services.Captcha
 
         protected async Task<string> Create(int purpose, string key, TimeSpan absoluteExpirationRelativeToNow)
         {
-            var code = StringUtils.GetRandomNumber(6);
+            var code = StringUtils.GetRandomNumber(4);
             var cacheKey = string.Format(CaptchaCacheKeyTemplate, purpose, key);
             await _cache.SetStringAsync(cacheKey, code, new DistributedCacheEntryOptions
             {

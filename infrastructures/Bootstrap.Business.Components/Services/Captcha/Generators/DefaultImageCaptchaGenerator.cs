@@ -49,7 +49,7 @@ namespace Bootstrap.Business.Components.Services.Captcha.Generators
 
                 var shiftPx = fontSize / 6;
 
-                float x = i * fontSize + _rand.Next(-shiftPx, shiftPx) + _rand.Next(-shiftPx, shiftPx);
+                float x = Math.Max(i * fontSize + _rand.Next(-shiftPx, shiftPx) + _rand.Next(-shiftPx, shiftPx), 0);
                 var maxY = height - fontSize;
                 if (maxY < 0) maxY = 0;
                 float y = _rand.Next(0, maxY);
@@ -60,7 +60,7 @@ namespace Bootstrap.Business.Components.Services.Captcha.Generators
 
         private void _drawDisorderLine(Graphics graph, int width, int height)
         {
-            var linePen = new Pen(new SolidBrush(Color.Black), 3);
+            var linePen = new Pen(new SolidBrush(Color.Black), 1);
             for (var i = 0; i < _rand.Next(3, 5); i++)
             {
                 linePen.Color = _getRandomDeepColor();
@@ -177,6 +177,8 @@ namespace Bootstrap.Business.Components.Services.Captcha.Generators
                     var ms = new MemoryStream();
 
                     baseMap.Save(ms, ImageFormat.Png);
+
+                    ms.Seek(0, SeekOrigin.Begin);
 
                     return Task.FromResult(new SingletonResponse<Stream>(ms));
                 }

@@ -35,7 +35,7 @@ namespace Bootstrap.Business.Models.Constants
         [Description("请求超时，请稍后再试")]
         Timeout = 504,
 
-        [Description("验证码有误")]
+        [Description("验证码有误或已过期，请重新提交")]
         InvalidCaptcha = 100400
     }
 }

@@ -473,7 +473,7 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
         /// <returns></returns>
         public virtual async Task<TDefaultResource> GetFirst(Expression<Func<TDefaultResource, bool>> selector,
             Expression<Func<TDefaultResource, object>> orderBy = null,
-            bool asc = true, CacheOptions cacheOptions = null) =>
+            bool asc = false, CacheOptions cacheOptions = null) =>
             await GetFirst<TDefaultResource>(selector, orderBy, asc, cacheOptions);
 
         /// <summary>
