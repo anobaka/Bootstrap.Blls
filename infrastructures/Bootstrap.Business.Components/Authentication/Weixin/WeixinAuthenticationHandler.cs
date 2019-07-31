@@ -16,7 +16,8 @@ namespace Bootstrap.Business.Components.Authentication.Weixin
 {
     class WeixinAuthenticationHandler : OAuthHandler<WeixinAuthenticationOptions>
     {
-        public WeixinAuthenticationHandler(IOptionsMonitor<WeixinAuthenticationOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock) : base(options, logger, encoder, clock)
+        public WeixinAuthenticationHandler(IOptionsMonitor<WeixinAuthenticationOptions> options, ILoggerFactory logger,
+            UrlEncoder encoder, ISystemClock clock) : base(options, logger, encoder, clock)
         {
         }
 
@@ -28,7 +29,8 @@ namespace Bootstrap.Business.Components.Authentication.Weixin
         /// <param name="properties"></param>
         /// <param name="tokens"></param>
         /// <returns></returns>
-        protected override async Task<AuthenticationTicket> CreateTicketAsync(ClaimsIdentity identity, AuthenticationProperties properties, OAuthTokenResponse tokens)
+        protected override async Task<AuthenticationTicket> CreateTicketAsync(ClaimsIdentity identity,
+            AuthenticationProperties properties, OAuthTokenResponse tokens)
         {
             var address = QueryHelpers.AddQueryString(Options.UserInformationEndpoint, new Dictionary<string, string>
             {
@@ -41,9 +43,9 @@ namespace Bootstrap.Business.Components.Authentication.Weixin
             {
                 Logger.LogError("An error occurred while retrieving the user profile: the remote server " +
                                 "returned a {Status} response with the following payload: {Headers} {Body}.",
-                                /* Status: */ response.StatusCode,
-                                /* Headers: */ response.Headers.ToString(),
-                                /* Body: */ await response.Content.ReadAsStringAsync());
+                    /* Status: */ response.StatusCode,
+                    /* Headers: */ response.Headers.ToString(),
+                    /* Body: */ await response.Content.ReadAsStringAsync());
 
                 throw new HttpRequestException("An error occurred while retrieving user information.");
             }
@@ -53,26 +55,36 @@ namespace Bootstrap.Business.Components.Authentication.Weixin
             {
                 Logger.LogError("An error occurred while retrieving the user profile: the remote server " +
                                 "returned a {Status} response with the following payload: {Headers} {Body}.",
-                                /* Status: */ response.StatusCode,
-                                /* Headers: */ response.Headers.ToString(),
-                                /* Body: */ await response.Content.ReadAsStringAsync());
+                    /* Status: */ response.StatusCode,
+                    /* Headers: */ response.Headers.ToString(),
+                    /* Body: */ await response.Content.ReadAsStringAsync());
 
                 throw new HttpRequestException("An error occurred while retrieving user information.");
             }
 
-            identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, WeixinAuthenticationHelper.GetUnionid(payload), Options.ClaimsIssuer));
-            identity.AddClaim(new Claim(ClaimTypes.Name, WeixinAuthenticationHelper.GetNickname(payload), Options.ClaimsIssuer));
-            identity.AddClaim(new Claim(ClaimTypes.Gender, WeixinAuthenticationHelper.GetSex(payload), Options.ClaimsIssuer));
-            identity.AddClaim(new Claim(ClaimTypes.Country, WeixinAuthenticationHelper.GetCountry(payload), Options.ClaimsIssuer));
-            identity.AddClaim(new Claim("urn:weixin:openid", WeixinAuthenticationHelper.GetOpenId(payload), Options.ClaimsIssuer));
-            identity.AddClaim(new Claim("urn:weixin:province", WeixinAuthenticationHelper.GetProvince(payload), Options.ClaimsIssuer));
-            identity.AddClaim(new Claim("urn:weixin:city", WeixinAuthenticationHelper.GetCity(payload), Options.ClaimsIssuer));
-            identity.AddClaim(new Claim("urn:weixin:headimgurl", WeixinAuthenticationHelper.GetHeadimgUrl(payload), Options.ClaimsIssuer));
-            identity.AddClaim(new Claim("urn:weixin:privilege", WeixinAuthenticationHelper.GetPrivilege(payload), Options.ClaimsIssuer));
+            identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, WeixinAuthenticationHelper.GetUnionid(payload),
+                Options.ClaimsIssuer));
+            identity.AddClaim(new Claim(ClaimTypes.Name, WeixinAuthenticationHelper.GetNickname(payload),
+                Options.ClaimsIssuer));
+            identity.AddClaim(new Claim(ClaimTypes.Gender, WeixinAuthenticationHelper.GetSex(payload),
+                Options.ClaimsIssuer));
+            identity.AddClaim(new Claim(ClaimTypes.Country, WeixinAuthenticationHelper.GetCountry(payload),
+                Options.ClaimsIssuer));
+            identity.AddClaim(new Claim("urn:weixin:openid", WeixinAuthenticationHelper.GetOpenId(payload),
+                Options.ClaimsIssuer));
+            identity.AddClaim(new Claim("urn:weixin:province", WeixinAuthenticationHelper.GetProvince(payload),
+                Options.ClaimsIssuer));
+            identity.AddClaim(new Claim("urn:weixin:city", WeixinAuthenticationHelper.GetCity(payload),
+                Options.ClaimsIssuer));
+            identity.AddClaim(new Claim("urn:weixin:headimgurl", WeixinAuthenticationHelper.GetHeadimgUrl(payload),
+                Options.ClaimsIssuer));
+            identity.AddClaim(new Claim("urn:weixin:privilege", WeixinAuthenticationHelper.GetPrivilege(payload),
+                Options.ClaimsIssuer));
 
             identity.AddClaim(new Claim("urn:weixin:user_info", payload.ToString(), Options.ClaimsIssuer));
 
-            var context = new OAuthCreatingTicketContext(new ClaimsPrincipal(identity), properties, Context, Scheme, Options, Backchannel, tokens, payload);
+            var context = new OAuthCreatingTicketContext(new ClaimsPrincipal(identity), properties, Context, Scheme,
+                Options, Backchannel, tokens, payload);
             context.RunClaimActions();
 
             await Events.CreatingTicket(context);
@@ -98,9 +110,9 @@ namespace Bootstrap.Business.Components.Authentication.Weixin
             {
                 Logger.LogError("An error occurred while retrieving an access token: the remote server " +
                                 "returned a {Status} response with the following payload: {Headers} {Body}.",
-                                /* Status: */ response.StatusCode,
-                                /* Headers: */ response.Headers.ToString(),
-                                /* Body: */ await response.Content.ReadAsStringAsync());
+                    /* Status: */ response.StatusCode,
+                    /* Headers: */ response.Headers.ToString(),
+                    /* Body: */ await response.Content.ReadAsStringAsync());
 
                 return OAuthTokenResponse.Failed(new Exception("An error occurred while retrieving an access token."));
             }
@@ -110,12 +122,13 @@ namespace Bootstrap.Business.Components.Authentication.Weixin
             {
                 Logger.LogError("An error occurred while retrieving an access token: the remote server " +
                                 "returned a {Status} response with the following payload: {Headers} {Body}.",
-                                /* Status: */ response.StatusCode,
-                                /* Headers: */ response.Headers.ToString(),
-                                /* Body: */ await response.Content.ReadAsStringAsync());
+                    /* Status: */ response.StatusCode,
+                    /* Headers: */ response.Headers.ToString(),
+                    /* Body: */ await response.Content.ReadAsStringAsync());
 
                 return OAuthTokenResponse.Failed(new Exception("An error occurred while retrieving an access token."));
             }
+
             return OAuthTokenResponse.Success(payload);
         }
 
