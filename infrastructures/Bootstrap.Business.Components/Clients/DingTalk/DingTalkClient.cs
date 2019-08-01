@@ -30,7 +30,7 @@ namespace Bootstrap.Business.Components.Clients.DingTalk
                 Method = HttpMethod.Get,
                 QueryParameters = new Dictionary<string, List<object>>
                 {
-                    {"appKey", new List<object> {Options.Value.AppKey}},
+                    {"appkey", new List<object> {Options.Value.AppKey}},
                     {"appsecret", new List<object> {Options.Value.AppSecret}}
                 },
                 RelativeUri = "gettoken"
