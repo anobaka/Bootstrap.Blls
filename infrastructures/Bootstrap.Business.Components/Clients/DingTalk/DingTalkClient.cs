@@ -32,7 +32,8 @@ namespace Bootstrap.Business.Components.Clients.DingTalk
                 {
                     {"appKey", new List<object> {Options.Value.AppKey}},
                     {"appsecret", new List<object> {Options.Value.AppSecret}}
-                }
+                },
+                RelativeUri = "gettoken"
             });
             if (rsp.ErrCode == 0)
             {
@@ -57,7 +58,8 @@ namespace Bootstrap.Business.Components.Clients.DingTalk
                 QueryParameters = new Dictionary<string, List<object>>
                 {
                     {nameof(code), new List<object> {code}}
-                }
+                },
+                RelativeUri = "user/getuserinfo"
             });
         }
 
