@@ -165,8 +165,6 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
             return resource;
         }
 
-        #region IdUnrelatedOperations
-
         /// <summary>
         /// 动态缓存
         /// </summary>
@@ -253,6 +251,8 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
         }
 
         #endregion
+
+        #region IdUnrelatedOperations
 
         /// <summary>
         /// 获取第一条，静态缓存
@@ -438,6 +438,12 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
             return new ListResponse<TResource>(resources);
         }
 
+        public virtual async Task<int> Count<TResource>(Expression<Func<TResource, bool>> selector)
+            where TResource : class
+        {
+            return await DbContext.Set<TResource>().CountAsync(selector);
+        }
+
         #endregion
     }
 
@@ -555,5 +561,8 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
         /// <returns></returns>
         public virtual async Task<ListResponse<TDefaultResource>> Create(List<TDefaultResource> resources) =>
             await base.Create(resources);
+
+        public virtual async Task<int> Count(Expression<Func<TDefaultResource, bool>> selector) =>
+            await base.Count(selector);
     }
 }
