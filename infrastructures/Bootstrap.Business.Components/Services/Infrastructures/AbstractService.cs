@@ -125,10 +125,20 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
             return _buildKeyExpression<TResource, bool>(key, (type, i, v) => Expression.Equal(i, v));
         }
 
-        private Expression<Func<TResource, bool>> _buildKeyContainsExpression<TResource>(IEnumerable<object> keys)
+        private Expression<Func<TResource, bool>> _buildKeyContainsExpression<TResource>(List<object> keys)
         {
-            return _buildKeyExpression<TResource, bool>(keys,
-                (t, i, v) => Expression.Call(typeof(Enumerable), nameof(Enumerable.Contains), new[] {t}, i, v));
+            var type = SpecificTypeUtils<TResource>.Type;
+            var keyProperty = type.GetKeyProperty();
+            if (keyProperty == null)
+            {
+                throw new InvalidOperationException($"Can not find a key property of type: {type.FullName}");
+            }
+
+            var trueTypeKeys = typeof(Enumerable).GetMethod(nameof(Enumerable.Cast))
+                ?.MakeGenericMethod(keyProperty.PropertyType)
+                .Invoke(null, new object[] {keys});
+            return _buildKeyExpression<TResource, bool>(trueTypeKeys,
+                (t, i, v) => Expression.Call(typeof(Enumerable), nameof(Enumerable.Contains), new[] {t}, v, i));
         }
 
         #endregion
