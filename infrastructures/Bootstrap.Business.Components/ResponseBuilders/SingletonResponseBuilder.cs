@@ -2,7 +2,7 @@
 using Bootstrap.Infrastructures.Extensions;
 using Bootstrap.Infrastructures.Models.ResponseModels;
 
-namespace Bootstrap.Business.Extensions.ResponseBuilders
+namespace Bootstrap.Business.Components.ResponseBuilders
 {
     public static class SingletonResponseBuilder<T>
     {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Bootstrap.Business.Extensions.ResponseBuilders;
+using Bootstrap.Business.Components.ResponseBuilders;
 using Bootstrap.Infrastructures.Models;
 using Bootstrap.Infrastructures.Models.ResponseModels;
 using Microsoft.EntityFrameworkCore;

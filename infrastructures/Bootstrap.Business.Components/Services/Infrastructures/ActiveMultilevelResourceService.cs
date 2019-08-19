@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Bootstrap.Business.Extensions.ResponseBuilders;
+using Bootstrap.Business.Components.ResponseBuilders;
 using Bootstrap.Infrastructures.Components.Extensions;
 using Bootstrap.Infrastructures.Models;
 using Bootstrap.Infrastructures.Models.ResponseModels;
