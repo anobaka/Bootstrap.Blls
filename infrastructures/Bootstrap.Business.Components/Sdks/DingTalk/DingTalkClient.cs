@@ -10,7 +10,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
-namespace Bootstrap.Business.Components.Clients.DingTalk
+namespace Bootstrap.Business.Components.Sdks.DingTalk
 {
     public class DingTalkClient : ServiceHttpClient<DingTalkClientOptions>
     {
