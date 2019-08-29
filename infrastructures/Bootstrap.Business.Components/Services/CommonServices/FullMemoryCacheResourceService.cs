@@ -12,13 +12,13 @@ using Microsoft.EntityFrameworkCore;
 namespace Bootstrap.Business.Components.Services.CommonServices
 {
     public abstract class
-        FullMemoryCacheResourceService<TDbContext, TResource, TKey>
+        FullMemoryCacheResourceService<TDbContext, TResource, TKey> : BaseService<TDbContext>
         where TDbContext : DbContext where TResource : class
     {
         protected ResourceService<TDbContext, TResource, TKey> ResourceService;
         protected ConcurrentDictionary<TKey, TResource> CacheVault;
 
-        protected FullMemoryCacheResourceService(IServiceProvider serviceProvider)
+        protected FullMemoryCacheResourceService(IServiceProvider serviceProvider) : base(serviceProvider)
         {
             ResourceService = new ResourceService<TDbContext, TResource, TKey>(serviceProvider);
             var data = ResourceService.GetAll().ConfigureAwait(false).GetAwaiter().GetResult()
@@ -26,12 +26,12 @@ namespace Bootstrap.Business.Components.Services.CommonServices
             CacheVault = new ConcurrentDictionary<TKey, TResource>(data);
         }
 
-        public TResource GetByKey(TKey key) => (CacheVault.TryGetValue(key, out var v) ? v : null).Copy();
+        public virtual TResource GetByKey(TKey key) => (CacheVault.TryGetValue(key, out var v) ? v : null).Copy();
 
-        public List<TResource> GetByKeys(IEnumerable<TKey> keys) =>
+        public virtual List<TResource> GetByKeys(IEnumerable<TKey> keys) =>
             keys.Select(GetByKey).Where(v => v != null).ToList();
 
-        public TResource GetFirst(Expression<Func<TResource, bool>> selector,
+        public virtual TResource GetFirst(Expression<Func<TResource, bool>> selector,
             Expression<Func<TResource, object>> orderBy = null, bool asc = false)
         {
             var data = CacheVault.Values.Where(selector.Compile());
@@ -44,13 +44,13 @@ namespace Bootstrap.Business.Components.Services.CommonServices
             return data.FirstOrDefault().Copy();
         }
 
-        public List<TResource> GetAll(Expression<Func<TResource, bool>> selector = null) =>
+        public virtual List<TResource> GetAll(Expression<Func<TResource, bool>> selector = null) =>
             (selector == null ? CacheVault.Values : CacheVault.Values.Where(selector.Compile())).ToList().Copy();
 
-        public int Count(Func<TResource, bool> selector = null) =>
+        public virtual int Count(Func<TResource, bool> selector = null) =>
             selector == null ? CacheVault.Values.Count : CacheVault.Values.Count(selector);
 
-        public SearchResponse<TResource> Search(Func<TResource, bool> selector,
+        public virtual SearchResponse<TResource> Search(Func<TResource, bool> selector,
             int pageIndex, int pageSize, Func<TResource, object> orderBy = null, bool asc = false)
         {
             var resources = CacheVault.Values.ToList();
@@ -70,7 +70,7 @@ namespace Bootstrap.Business.Components.Services.CommonServices
             return result.Copy();
         }
 
-        public Task<BaseResponse> RemoveAll(Expression<Func<TResource, bool>> selector)
+        public virtual Task<BaseResponse> RemoveAll(Expression<Func<TResource, bool>> selector)
         {
             var func = selector.Compile();
             var keys = CacheVault.Where(t => func(t.Value)).Select(a => a.Key);
@@ -82,20 +82,20 @@ namespace Bootstrap.Business.Components.Services.CommonServices
             return ResourceService.RemoveAll(selector);
         }
 
-        public Task<BaseResponse> RemoveByKey(TKey key)
+        public virtual Task<BaseResponse> RemoveByKey(TKey key)
         {
             CacheVault.Remove(key, out _);
             return ResourceService.RemoveByKey(key);
         }
 
-        public Task<BaseResponse> RemoveByKeys(IEnumerable<TKey> keys)
+        public virtual Task<BaseResponse> RemoveByKeys(IEnumerable<TKey> keys)
         {
             var ks = keys.ToList();
             ks.ForEach(k => RemoveByKey(k));
             return ResourceService.RemoveByKeys(ks);
         }
 
-        public async Task<SingletonResponse<TResource>> Add(TResource resource)
+        public virtual async Task<SingletonResponse<TResource>> Add(TResource resource)
         {
             var rsp = await ResourceService.Add(resource);
             if (rsp.Data != null)
@@ -108,7 +108,7 @@ namespace Bootstrap.Business.Components.Services.CommonServices
             return rsp;
         }
 
-        public async Task<ListResponse<TResource>> AddRange(List<TResource> resources)
+        public virtual async Task<ListResponse<TResource>> AddRange(List<TResource> resources)
         {
             var rsp = await ResourceService.AddRange(resources);
             if (rsp.Data != null)

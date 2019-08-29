@@ -118,6 +118,8 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
 
         public virtual Task<int> Count(Expression<Func<TResource, bool>> selector) => BaseService.Count(selector);
 
+        public virtual Task<BaseResponse> Update(TResource resource) => BaseService.Update(resource);
+
         public virtual Task<SingletonResponse<TResource>> UpdateFirst(Expression<Func<TResource, bool>> selector,
             Action<TResource> modify) => BaseService.UpdateFirst(selector, modify);
 

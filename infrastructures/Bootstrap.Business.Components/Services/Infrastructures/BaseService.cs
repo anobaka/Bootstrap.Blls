@@ -24,6 +24,7 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
         public BaseService(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
+
         #region IdRelatedOperations
 
         /// <summary>
@@ -81,7 +82,8 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
             return rsp;
         }
 
-        public virtual async Task<SingletonResponse<TResource>> UpdateByKey<TResource>(object key, Action<TResource> modify)
+        public virtual async Task<SingletonResponse<TResource>> UpdateByKey<TResource>(object key,
+            Action<TResource> modify)
             where TResource : class
         {
             var r = await GetByKey<TResource>(key);
@@ -170,7 +172,7 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
         /// <returns></returns>
         public virtual async Task<SearchResponse<TResource>> Search<TResource>(
             Expression<Func<TResource, bool>> selector, int pageIndex, int pageSize,
-            Expression<Func<TResource, object>> orderBy = null, bool asc = false, 
+            Expression<Func<TResource, object>> orderBy = null, bool asc = false,
             Expression<Func<TResource, object>> include = null)
             where TResource : class
         {
@@ -240,6 +242,13 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
             return await DbContext.Set<TResource>().CountAsync(selector);
         }
 
+        public virtual async Task<BaseResponse> Update<TResource>(TResource resource)
+        {
+            DbContext.Entry(resource).State = EntityState.Modified;
+            await DbContext.SaveChangesAsync();
+            return BaseResponseBuilder.Ok;
+        }
+
         public virtual async Task<SingletonResponse<TResource>> UpdateFirst<TResource>(
             Expression<Func<TResource, bool>> selector,
             Action<TResource> modify)
@@ -251,7 +260,8 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
             return new SingletonResponse<TResource>(r);
         }
 
-        public virtual async Task<ListResponse<TResource>> UpdateAll<TResource>(Expression<Func<TResource, bool>> selector,
+        public virtual async Task<ListResponse<TResource>> UpdateAll<TResource>(
+            Expression<Func<TResource, bool>> selector,
             Action<TResource> modify)
             where TResource : class
         {
@@ -267,6 +277,4 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
 
         #endregion
     }
-
-    
 }
