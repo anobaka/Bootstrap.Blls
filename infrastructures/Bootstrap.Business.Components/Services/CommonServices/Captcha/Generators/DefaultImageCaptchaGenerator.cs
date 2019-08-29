@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Text;
 using System.Threading.Tasks;
 using Bootstrap.Infrastructures.Models.ResponseModels;
-using Microsoft.AspNetCore.Identity;
 
-namespace Bootstrap.Business.Components.Services.Captcha.Generators
+namespace Bootstrap.Business.Components.Services.CommonServices.Captcha.Generators
 {
     public class DefaultImageCaptchaGenerator : IImageCaptchaGenerator
     {

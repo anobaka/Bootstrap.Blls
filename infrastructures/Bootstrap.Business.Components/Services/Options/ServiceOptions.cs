@@ -2,6 +2,6 @@
 {
     public class ServiceOptions
     {
-        public bool EnableCache { get; set; }
+
     }
 }

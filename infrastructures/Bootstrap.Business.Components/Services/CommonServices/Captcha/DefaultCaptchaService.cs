@@ -1,13 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using Bootstrap.Business.Components.Services.Captcha.Generators;
-using Bootstrap.Business.Components.Services.Infrastructures;
-using Bootstrap.Infrastructures.Components.FileManager;
+using Bootstrap.Business.Components.Services.CommonServices.Captcha.Generators;
 using Bootstrap.Infrastructures.Models.ResponseModels;
 using Microsoft.Extensions.Caching.Distributed;
 
-namespace Bootstrap.Business.Components.Services.Captcha
+namespace Bootstrap.Business.Components.Services.CommonServices.Captcha
 {
     public class DefaultCaptchaService : AbstractCaptchaService
     {

@@ -13,7 +13,7 @@ namespace Bootstrap.Business.Components.Extensions
 {
     public static class MockExtensions
     {
-        public static async Task<T> GetOrCreate<TDbContext, T>(AbstractService<TDbContext, T> service,
+        public static async Task<T> GetOrCreate<TDbContext, T>(ResourceService<TDbContext, T, object> service,
             Expression<Func<T, bool>> first,
             object createModel) where T : class where TDbContext : DbContext
 
@@ -25,11 +25,11 @@ namespace Bootstrap.Business.Components.Extensions
                 var methods = serviceType.GetMethods();
                 var method = methods
                                  .FirstOrDefault(t =>
-                                     t.Name.Equals("Create") && t.GetParameters().FirstOrDefault()?.ParameterType.Name
+                                     t.Name.Equals("Add") && t.GetParameters().FirstOrDefault()?.ParameterType.Name
                                          .Contains("CreateRequestModel") == true) ??
                              methods
                                  .FirstOrDefault(t =>
-                                     t.Name.Equals("Create") && t.GetParameters().FirstOrDefault()?.ParameterType.Name
+                                     t.Name.Equals("Add") && t.GetParameters().FirstOrDefault()?.ParameterType.Name
                                          .Equals(SpecificTypeUtils<T>.Type.Name) == true);
                 instance = (await (method.Invoke(service, new[] {createModel}) as Task<SingletonResponse<T>>)).Data;
             }

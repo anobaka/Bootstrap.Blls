@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Bootstrap.Infrastructures.Extensions;
 using Microsoft.Extensions.Caching.Distributed;
 
-namespace Bootstrap.Business.Components.Services.Captcha
+namespace Bootstrap.Business.Components.Services.CommonServices.Captcha
 {
     public class AbstractCaptchaService
     {

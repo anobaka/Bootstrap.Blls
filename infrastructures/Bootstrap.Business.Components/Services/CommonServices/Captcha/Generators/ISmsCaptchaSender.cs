@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Bootstrap.Infrastructures.Models.ResponseModels;
 
-namespace Bootstrap.Business.Components.Services.Captcha.Generators
+namespace Bootstrap.Business.Components.Services.CommonServices.Captcha.Generators
 {
     public interface ISmsCaptchaSender
     {

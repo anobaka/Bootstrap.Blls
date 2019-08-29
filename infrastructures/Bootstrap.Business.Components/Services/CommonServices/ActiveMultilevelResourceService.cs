@@ -4,23 +4,24 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Bootstrap.Business.Components.ResponseBuilders;
+using Bootstrap.Business.Components.Services.Infrastructures;
 using Bootstrap.Infrastructures.Components.Extensions;
 using Bootstrap.Infrastructures.Models;
 using Bootstrap.Infrastructures.Models.ResponseModels;
 using Microsoft.EntityFrameworkCore;
 
-namespace Bootstrap.Business.Components.Services.Infrastructures
+namespace Bootstrap.Business.Components.Services.CommonServices
 {
     public class
-        ActiveMultilevelResourceService<TDbContext, TDefaultResource> : AbstractService<TDbContext,
-            TDefaultResource>
-        where TDbContext : DbContext where TDefaultResource : ActiveMultilevelResource<TDefaultResource>
+        ActiveMultilevelResourceService<TDbContext, TActiveMultilevelResource, TKey> : ResourceService<TDbContext,
+            TActiveMultilevelResource, TKey>
+        where TDbContext : DbContext where TActiveMultilevelResource : ActiveMultilevelResource<TActiveMultilevelResource>
     {
         public ActiveMultilevelResourceService(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
 
-        public async Task<List<TDefaultResource>> GetPath(int id)
+        public async Task<List<TActiveMultilevelResource>> GetPath(TKey id)
         {
             var resource = await GetByKey(id);
             if (resource == null)
@@ -28,10 +29,10 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
                 return null;
             }
 
-            return GetPath(DbContext.Set<TDefaultResource>(), resource);
+            return GetPath(DbContext.Set<TActiveMultilevelResource>(), resource);
         }
 
-        public List<TDefaultResource> GetPath(IEnumerable<TDefaultResource> allResources, TDefaultResource child)
+        public List<TActiveMultilevelResource> GetPath(IEnumerable<TActiveMultilevelResource> allResources, TActiveMultilevelResource child)
         {
             if (child == null)
             {
@@ -43,7 +44,7 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
             return path.OrderBy(t => t.Left).ToList();
         }
 
-        public async Task<List<TDefaultResource>> GetFullTree()
+        public async Task<List<TActiveMultilevelResource>> GetFullTree()
         {
             var data = await GetAll(t => t.Active);
             var root = data.FindAll(t => !t.ParentId.HasValue);
@@ -51,7 +52,7 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
             return root;
         }
 
-        private void _populateTree(List<TDefaultResource> parents, List<TDefaultResource> allData)
+        private void _populateTree(IReadOnlyCollection<TActiveMultilevelResource> parents, List<TActiveMultilevelResource> allData)
         {
             if (parents != null && allData != null)
             {
@@ -75,7 +76,7 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
             await DbContext.SaveChangesAsync();
         }
 
-        public override async Task<BaseResponse> Delete(Expression<Func<TDefaultResource, bool>> selector)
+        public override async Task<BaseResponse> RemoveAll(Expression<Func<TActiveMultilevelResource, bool>> selector)
         {
             var resources = await GetAll(selector);
             resources.ForEach(a => a.Active = false);
@@ -84,7 +85,7 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
             return BaseResponseBuilder.Ok;
         }
 
-        public override async Task<SingletonResponse<TDefaultResource>> Create(TDefaultResource resource)
+        public override async Task<SingletonResponse<TActiveMultilevelResource>> Create(TActiveMultilevelResource resource)
         {
             var rsp = await base.Create(resource);
             await BuildTree();
@@ -92,7 +93,7 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
         }
 
 
-        public override async Task<BaseResponse> DeleteByKey(object key)
+        public override async Task<BaseResponse> RemoveByKey(TKey key)
         {
             var resource = await GetByKey(key);
             resource.Active = false;
@@ -101,7 +102,7 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
             return BaseResponseBuilder.Ok;
         }
 
-        public override async Task<BaseResponse> DeleteByKeys(IEnumerable<object> key)
+        public override async Task<BaseResponse> RemoveByKeys(IEnumerable<TKey> key)
         {
             var resources = await GetByKeys(key);
             resources.ForEach(a => a.Active = false);
@@ -110,9 +111,9 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
             return BaseResponseBuilder.Ok;
         }
 
-        public override async Task<SingletonResponse<TResource>> Create<TResource>(TResource resource)
+        public override async Task<ListResponse<TActiveMultilevelResource>> Create(List<TActiveMultilevelResource> resources)
         {
-            var rsp = await base.Create(resource);
+            var rsp = await base.Create(resources);
             await BuildTree();
             return rsp;
         }
