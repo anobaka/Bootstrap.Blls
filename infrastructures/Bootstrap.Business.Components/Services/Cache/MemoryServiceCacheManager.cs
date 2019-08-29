@@ -10,17 +10,13 @@ namespace Bootstrap.Business.Components.Services.Cache
 {
     public class MemoryServiceCacheManager : IServiceCacheManager
     {
+        #region Key based cache
+
         /// <summary>
         /// Type - Key - Data
         /// </summary>
         private readonly ConcurrentDictionary<string, ConcurrentDictionary<object, object>> _defaultCacheVault =
             new ConcurrentDictionary<string, ConcurrentDictionary<object, object>>();
-
-        /// <summary>
-        /// CacheKey - Data
-        /// </summary>
-        private readonly ConcurrentDictionary<string, object> _customCacheVault =
-            new ConcurrentDictionary<string, object>();
 
         public Task<T> Get<T>(object id) where T : class
         {
@@ -99,16 +95,46 @@ namespace Bootstrap.Business.Components.Services.Cache
             return Task.CompletedTask;
         }
 
-        public Task<T> GetCustomCache<T>(string cacheKey) where T : class
+        public Task Delete<T>(Func<T, bool> selector) where T : class
+        {
+            if (_defaultCacheVault.TryGetValue(SpecificTypeUtils<T>.Type.FullName, out var vault))
+            {
+                var keys = vault.Where(t => selector((T) t.Value)).Select(a => a.Key);
+                foreach (var k in keys)
+                {
+                    vault.Remove(k, out _);
+                }
+            }
+
+            return Task.CompletedTask;
+        }
+
+        #endregion
+
+        #region Custom cache key based cache
+
+        /// <summary>
+        /// CacheKey - Data
+        /// </summary>
+        private readonly ConcurrentDictionary<string, object> _customCacheVault =
+            new ConcurrentDictionary<string, object>();
+
+        public Task<T> GetCustomKeyCache<T>(string cacheKey) where T : class
         {
             return _customCacheVault.TryGetValue(_buildCacheKey<T>(cacheKey), out var o)
                 ? Task.FromResult((T) o)
                 : null;
         }
 
-        public Task SetCustomCache<T>(string cacheKey, T obj) where T : class
+        public Task SetCustomKeyCache<T>(string cacheKey, T obj) where T : class
         {
             _customCacheVault[_buildCacheKey<T>(cacheKey)] = obj;
+            return Task.CompletedTask;
+        }
+
+        public Task DeleteCustomKeyCache<T>(string cacheKey) where T : class
+        {
+            _customCacheVault.Remove(cacheKey, out _);
             return Task.CompletedTask;
         }
 
@@ -116,5 +142,7 @@ namespace Bootstrap.Business.Components.Services.Cache
         {
             return $"{SpecificTypeUtils<T>.Type.FullName}-{key}";
         }
+
+        #endregion
     }
 }

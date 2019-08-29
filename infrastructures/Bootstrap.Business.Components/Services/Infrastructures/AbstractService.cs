@@ -260,6 +260,38 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
             return rsp;
         }
 
+        public virtual async Task<SingletonResponse<TResource>> Update<TResource>(object key, Action<TResource> modify)
+            where TResource : class
+        {
+            if (Options.Value.EnableCache)
+            {
+                await CacheManager.Delete<TResource>(key);
+            }
+            var r = await GetByKey<TResource>(key);
+            modify(r);
+            await DbContext.SaveChangesAsync();
+            return new SingletonResponse<TResource>(r);
+        }
+
+        public virtual async Task<ListResponse<TResource>> Update<TResource>(IReadOnlyCollection<object> keys,
+            Action<TResource> modify)
+            where TResource : class
+        {
+            if (Options.Value.EnableCache)
+            {
+                await CacheManager.Delete<TResource>(keys);
+            }
+
+            var rs = await GetByKeys<TResource>(keys);
+            foreach (var r in rs)
+            {
+                modify(r);
+            }
+
+            await DbContext.SaveChangesAsync();
+            return new ListResponse<TResource>(rs);
+        }
+
         #endregion
 
         #region IdUnrelatedOperations
@@ -280,7 +312,7 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
             TResource result = null;
             if (cacheOptions?.IsValid == true)
             {
-                result = await CacheManager.GetCustomCache<TResource>(cacheOptions.CacheKey);
+                result = await CacheManager.GetCustomKeyCache<TResource>(cacheOptions.CacheKey);
             }
 
             if (result == null)
@@ -321,14 +353,14 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
             List<TResource> result = null;
             if (selector == null && cacheOptions != null)
             {
-                result = await CacheManager.GetCustomCache<List<TResource>>(cacheOptions.CacheKey);
+                result = await CacheManager.GetCustomKeyCache<List<TResource>>(cacheOptions.CacheKey);
             }
 
             if (cacheOptions?.IsValid == true)
             {
                 if (!cacheOptions.Refresh)
                 {
-                    result = await CacheManager.GetCustomCache<List<TResource>>(cacheOptions.CacheKey);
+                    result = await CacheManager.GetCustomKeyCache<List<TResource>>(cacheOptions.CacheKey);
                 }
             }
 
@@ -372,7 +404,7 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
             SearchResponse<TResource> result = null;
             if (cacheOptions?.IsValid == true)
             {
-                result = await CacheManager.GetCustomCache<SearchResponse<TResource>>(cacheOptions.CacheKey);
+                result = await CacheManager.GetCustomKeyCache<SearchResponse<TResource>>(cacheOptions.CacheKey);
             }
 
             if (result == null)
@@ -452,6 +484,31 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
             where TResource : class
         {
             return await DbContext.Set<TResource>().CountAsync(selector);
+        }
+
+        public virtual async Task<SingletonResponse<TResource>> UpdateFirst<TResource>(
+            Expression<Func<TResource, bool>> selector,
+            Action<TResource> modify)
+            where TResource : class
+        {
+            var r = (await GetAll(selector)).FirstOrDefault();
+            modify(r);
+            await DbContext.SaveChangesAsync();
+            return new SingletonResponse<TResource>(r);
+        }
+
+        public virtual async Task<ListResponse<TResource>> Update<TResource>(Expression<Func<TResource, bool>> selector,
+            Action<TResource> modify)
+            where TResource : class
+        {
+            var rs = await GetAll(selector);
+            foreach (var r in rs)
+            {
+                modify(r);
+            }
+
+            await DbContext.SaveChangesAsync();
+            return new ListResponse<TResource>(rs);
         }
 
         #endregion
