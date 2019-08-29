@@ -85,9 +85,9 @@ namespace Bootstrap.Business.Components.Services.CommonServices
             return BaseResponseBuilder.Ok;
         }
 
-        public override async Task<SingletonResponse<TActiveMultilevelResource>> Create(TActiveMultilevelResource resource)
+        public override async Task<SingletonResponse<TActiveMultilevelResource>> Add(TActiveMultilevelResource resource)
         {
-            var rsp = await base.Create(resource);
+            var rsp = await base.Add(resource);
             await BuildTree();
             return rsp;
         }
@@ -111,9 +111,9 @@ namespace Bootstrap.Business.Components.Services.CommonServices
             return BaseResponseBuilder.Ok;
         }
 
-        public override async Task<ListResponse<TActiveMultilevelResource>> Create(List<TActiveMultilevelResource> resources)
+        public override async Task<ListResponse<TActiveMultilevelResource>> AddRange(List<TActiveMultilevelResource> resources)
         {
-            var rsp = await base.Create(resources);
+            var rsp = await base.AddRange(resources);
             await BuildTree();
             return rsp;
         }

@@ -226,7 +226,7 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
         /// <typeparam name="TResource"></typeparam>
         /// <param name="resources"></param>
         /// <returns></returns>
-        public virtual async Task<ListResponse<TResource>> Add<TResource>(List<TResource> resources)
+        public virtual async Task<ListResponse<TResource>> AddRange<TResource>(List<TResource> resources)
             where TResource : class
         {
             DbContext.AddRange(resources);

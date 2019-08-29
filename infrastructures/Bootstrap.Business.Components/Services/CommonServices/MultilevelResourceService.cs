@@ -76,16 +76,16 @@ namespace Bootstrap.Business.Components.Services.CommonServices
             await DbContext.SaveChangesAsync();
         }
 
-        public override async Task<SingletonResponse<TMultilevelResource>> Create(TMultilevelResource resource)
+        public override async Task<SingletonResponse<TMultilevelResource>> Add(TMultilevelResource resource)
         {
-            var rsp = await base.Create(resource);
+            var rsp = await base.Add(resource);
             await BuildTree();
             return rsp;
         }
 
-        public override async Task<ListResponse<TMultilevelResource>> Create(List<TMultilevelResource> resources)
+        public override async Task<ListResponse<TMultilevelResource>> AddRange(List<TMultilevelResource> resources)
         {
-            var rsp = await base.Create(resources);
+            var rsp = await base.AddRange(resources);
             await BuildTree();
             return rsp;
         }

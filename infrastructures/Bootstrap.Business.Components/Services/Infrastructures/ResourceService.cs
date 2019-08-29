@@ -36,6 +36,12 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
         public virtual async Task<List<TResource>> GetByKeys(IEnumerable<TKey> keys) =>
             await BaseService.GetByKeys<TResource>(keys.Cast<object>());
 
+        public virtual Task<SingletonResponse<TResource>> UpdateByKey(TKey key, Action<TResource> modify) =>
+            BaseService.UpdateByKey(key, modify);
+
+        public virtual Task<ListResponse<TResource>> UpdateByKeys(IReadOnlyCollection<TKey> keys,
+            Action<TResource> modify) => BaseService.UpdateByKeys(keys.Cast<object>().ToList(), modify);
+
         /// <summary>
         /// 获取单条默认资源
         /// </summary>
@@ -43,10 +49,9 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
         /// <param name="orderBy"></param>
         /// <param name="asc"></param>
         /// <returns></returns>
-        public virtual async Task<TResource> GetFirst(Expression<Func<TResource, bool>> selector,
+        public virtual Task<TResource> GetFirst(Expression<Func<TResource, bool>> selector,
             Expression<Func<TResource, object>> orderBy = null,
-            bool asc = false) =>
-            await BaseService.GetFirst(selector, orderBy, asc);
+            bool asc = false) => BaseService.GetFirst(selector, orderBy, asc);
 
         /// <summary>
         /// 获取全部默认资源
@@ -54,8 +59,8 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
         /// <param name="selector">为空则获取全部</param>
         /// <param name="useNewDbContext"></param>
         /// <returns></returns>
-        public virtual async Task<List<TResource>> GetAll(Expression<Func<TResource, bool>> selector = null,
-            bool useNewDbContext = false) => await BaseService.GetAll(selector, useNewDbContext);
+        public virtual Task<List<TResource>> GetAll(Expression<Func<TResource, bool>> selector = null,
+            bool useNewDbContext = false) => BaseService.GetAll(selector, useNewDbContext);
 
         /// <summary>
         /// 搜索默认资源
@@ -67,57 +72,56 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
         /// <param name="asc"></param>
         /// <param name="include"></param>
         /// <returns></returns>
-        public virtual async Task<SearchResponse<TResource>> Search(
+        public virtual Task<SearchResponse<TResource>> Search(
             Expression<Func<TResource, bool>> selector, int pageIndex, int pageSize,
             Expression<Func<TResource, object>> orderBy = null, bool asc = false,
             Expression<Func<TResource, object>> include = null) =>
-            await BaseService.Search(selector, pageIndex, pageSize, orderBy, asc, include);
+            BaseService.Search(selector, pageIndex, pageSize, orderBy, asc, include);
 
         /// <summary>
         /// 删除默认资源
         /// </summary>
         /// <param name="selector"></param>
         /// <returns></returns>
-        public virtual async Task<BaseResponse> RemoveAll(Expression<Func<TResource, bool>> selector) =>
-            await BaseService.RemoveAll(selector);
+        public virtual Task<BaseResponse> RemoveAll(Expression<Func<TResource, bool>> selector) =>
+            BaseService.RemoveAll(selector);
 
         /// <summary>
         /// 删除
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public virtual async Task<BaseResponse> RemoveByKey(TKey key)
-        {
-            return await BaseService.RemoveByKey<TResource>(key);
-        }
+        public virtual Task<BaseResponse> RemoveByKey(TKey key) => BaseService.RemoveByKey<TResource>(key);
 
         /// <summary>
         /// 删除
         /// </summary>
         /// <param name="keys"></param>
         /// <returns></returns>
-        public virtual async Task<BaseResponse> RemoveByKeys(IEnumerable<TKey> keys)
-        {
-            return await BaseService.RemoveByKeys<TResource>(keys.Cast<object>());
-        }
+        public virtual Task<BaseResponse> RemoveByKeys(IEnumerable<TKey> keys) =>
+            BaseService.RemoveByKeys<TResource>(keys.Cast<object>());
 
         /// <summary>
         /// 创建默认资源
         /// </summary>
         /// <param name="resource"></param>
         /// <returns></returns>
-        public virtual async Task<SingletonResponse<TResource>> Create(TResource resource) =>
-            await BaseService.Add(resource);
+        public virtual Task<SingletonResponse<TResource>> Add(TResource resource) => BaseService.Add(resource);
 
         /// <summary>
         /// 创建默认资源
         /// </summary>
         /// <param name="resources"></param>
         /// <returns></returns>
-        public virtual async Task<ListResponse<TResource>> Create(List<TResource> resources) =>
-            await BaseService.Add(resources);
+        public virtual Task<ListResponse<TResource>> AddRange(List<TResource> resources) =>
+            BaseService.AddRange(resources);
 
-        public virtual async Task<int> Count(Expression<Func<TResource, bool>> selector) =>
-            await BaseService.Count(selector);
+        public virtual Task<int> Count(Expression<Func<TResource, bool>> selector) => BaseService.Count(selector);
+
+        public virtual Task<SingletonResponse<TResource>> UpdateFirst(Expression<Func<TResource, bool>> selector,
+            Action<TResource> modify) => BaseService.UpdateFirst(selector, modify);
+
+        public virtual Task<ListResponse<TResource>> UpdateAll(Expression<Func<TResource, bool>> selector,
+            Action<TResource> modify) => BaseService.UpdateAll(selector, modify);
     }
 }
