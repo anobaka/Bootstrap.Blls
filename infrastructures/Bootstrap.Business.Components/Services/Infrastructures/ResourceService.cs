@@ -78,6 +78,9 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
             Expression<Func<TResource, object>> include = null) =>
             BaseService.Search(selector, pageIndex, pageSize, orderBy, asc, include);
 
+        public virtual Task<BaseResponse> Remove(TResource resource) => BaseService.Remove(resource);
+        public virtual Task<BaseResponse> RemoveRange(IEnumerable<TResource> resources) => BaseService.RemoveRange(resources);
+
         /// <summary>
         /// 删除默认资源
         /// </summary>
@@ -119,6 +122,7 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
         public virtual Task<int> Count(Expression<Func<TResource, bool>> selector) => BaseService.Count(selector);
 
         public virtual Task<BaseResponse> Update(TResource resource) => BaseService.Update(resource);
+        public virtual Task<BaseResponse> UpdateRange(IEnumerable<TResource> resources) => BaseService.UpdateRange(resources);
 
         public virtual Task<SingletonResponse<TResource>> UpdateFirst(Expression<Func<TResource, bool>> selector,
             Action<TResource> modify) => BaseService.UpdateFirst(selector, modify);

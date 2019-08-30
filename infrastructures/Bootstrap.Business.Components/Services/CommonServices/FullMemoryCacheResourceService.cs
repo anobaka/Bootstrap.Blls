@@ -5,14 +5,14 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Bootstrap.Business.Components.Services.Infrastructures;
+using Bootstrap.Business.Models.Constants;
 using Bootstrap.Infrastructures.Extensions;
 using Bootstrap.Infrastructures.Models.ResponseModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bootstrap.Business.Components.Services.CommonServices
 {
-    public abstract class
-        FullMemoryCacheResourceService<TDbContext, TResource, TKey> : BaseService<TDbContext>
+    public abstract class FullMemoryCacheResourceService<TDbContext, TResource, TKey> : ServiceBase<TDbContext>
         where TDbContext : DbContext where TResource : class
     {
         protected ResourceService<TDbContext, TResource, TKey> ResourceService;
@@ -69,6 +69,11 @@ namespace Bootstrap.Business.Components.Services.CommonServices
             var result = new SearchResponse<TResource>(data, count, pageIndex, pageSize);
             return result.Copy();
         }
+
+        public virtual Task<BaseResponse> Remove(TResource resource) => ResourceService.Remove(resource);
+
+        public virtual Task<BaseResponse> RemoveRange(IEnumerable<TResource> resources) =>
+            ResourceService.RemoveRange(resources);
 
         public virtual Task<BaseResponse> RemoveAll(Expression<Func<TResource, bool>> selector)
         {
@@ -132,6 +137,31 @@ namespace Bootstrap.Business.Components.Services.CommonServices
             }
 
             rsp.Data = rsp.Data.Copy();
+            return rsp;
+        }
+
+        public virtual async Task<BaseResponse> Update(TResource resource)
+        {
+            var rsp = await ResourceService.Update(resource);
+            if (rsp.Code == (int)ResponseCode.Success)
+            {
+                CacheVault[resource.GetKeyPropertyValue<TKey>()] = resource;
+            }
+
+            return rsp;
+        }
+
+        public virtual async Task<BaseResponse> UpdateRange(IReadOnlyCollection<TResource> resources)
+        {
+            var rsp = await ResourceService.UpdateRange(resources);
+            if (rsp.Code == (int)ResponseCode.Success)
+            {
+                foreach (var resource in resources)
+                {
+                    CacheVault[resource.GetKeyPropertyValue<TKey>()] = resource;
+                }
+            }
+
             return rsp;
         }
 

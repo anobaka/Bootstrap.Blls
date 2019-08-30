@@ -54,6 +54,25 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
             return resources.Values.ToList();
         }
 
+        // todo: test
+        public virtual async Task<BaseResponse> Remove<TResource>(TResource resource)
+        {
+            DbContext.Entry(resource).State = EntityState.Deleted;
+            await DbContext.SaveChangesAsync();
+            return BaseResponseBuilder.Ok;
+        }
+
+        // todo: test
+        public virtual async Task<BaseResponse> RemoveRange<TResource>(IEnumerable<TResource> resources)
+        {
+            foreach (var r in resources)
+            {
+                DbContext.Entry(r).State = EntityState.Deleted;
+            }
+            await DbContext.SaveChangesAsync();
+            return BaseResponseBuilder.Ok;
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -245,6 +264,17 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
         public virtual async Task<BaseResponse> Update<TResource>(TResource resource)
         {
             DbContext.Entry(resource).State = EntityState.Modified;
+            await DbContext.SaveChangesAsync();
+            return BaseResponseBuilder.Ok;
+        }
+
+        public virtual async Task<BaseResponse> UpdateRange<TResource>(IEnumerable<TResource> resources)
+        {
+            foreach (var r in resources)
+            {
+                DbContext.Entry(r).State = EntityState.Modified;
+            }
+
             await DbContext.SaveChangesAsync();
             return BaseResponseBuilder.Ok;
         }
