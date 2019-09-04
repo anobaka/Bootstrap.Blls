@@ -331,7 +331,7 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
                 result = await query.FirstOrDefaultAsync();
                 if (cacheOptions?.IsValid == true && result != null)
                 {
-                    await CacheManager.SetCustomCache(cacheOptions.CacheKey, result);
+                    await CacheManager.SetCustomKeyCache(cacheOptions.CacheKey, result);
                 }
             }
 
@@ -376,7 +376,7 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
                 result = await query.ToListAsync();
                 if (cacheOptions?.IsValid == true && result != null)
                 {
-                    await CacheManager.SetCustomCache(cacheOptions.CacheKey, result);
+                    await CacheManager.SetCustomKeyCache(cacheOptions.CacheKey, result);
                 }
             }
 
@@ -425,7 +425,7 @@ namespace Bootstrap.Business.Components.Services.Infrastructures
                 result = new SearchResponse<TResource>(data, count, pageIndex, pageSize);
                 if (cacheOptions?.IsValid == true)
                 {
-                    await CacheManager.SetCustomCache(cacheOptions.CacheKey, result);
+                    await CacheManager.SetCustomKeyCache(cacheOptions.CacheKey, result);
                 }
             }
 
